@@ -1,20 +1,22 @@
 import os
 
-# === 모델 설정 ===
-RETRIEVER_MODEL = "BAAI/bge-m3"          # 다국어 임베딩 (한국어 지원)
-PPL_MODEL       = "gpt2"                  # PPL 계산용 언어 모델
-GENERATOR_MODEL = "gpt-4o-mini"           # OpenAI 생성 모델
+# === Ollama 설정 ===
+OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_EMBED_MODEL = "bge-m3"      # ollama list에서 확인
+OLLAMA_CHAT_MODEL  = "qwen3:4b"    # ollama list에서 확인
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+# === 모델 설정 (하위 호환) ===
+RETRIEVER_MODEL = OLLAMA_EMBED_MODEL
+GENERATOR_MODEL = OLLAMA_CHAT_MODEL
 
 # === RAG 설정 ===
 TOP_K = 5     # 최종 LLM에 전달할 chunk 수
 TOP_N = 20    # 위험도 평가 전 후보 pool 크기
 
 # === Risk Score 가중치 ===
-WEIGHT_INSTRUCTIONALITY  = 0.35
-WEIGHT_REFUSAL           = 0.30
-WEIGHT_PPL_OUTLIER       = 0.20
+WEIGHT_INSTRUCTIONALITY   = 0.35
+WEIGHT_REFUSAL            = 0.30
+WEIGHT_PPL_OUTLIER        = 0.20
 WEIGHT_RELEVANCE_MISMATCH = 0.15
 
 # === 탐지 임계값 ===
@@ -25,9 +27,9 @@ SEVERITY_LOW    = 0.3   # A: 제거만
 SEVERITY_MEDIUM = 0.6   # B: top-k 교체
 # > SEVERITY_MEDIUM     # C: 치환 (LLM 재작성)
 
-# === PPL 정규화 ===
-PPL_CORPUS_MEAN = 120.0   # 정상 문서 평균 PPL (초기 추정, 런타임에 업데이트)
-PPL_CORPUS_STD  = 40.0    # 정상 문서 PPL 표준편차
+# === PPL 정규화 (휴리스틱 기반, 신경망 모델 불필요) ===
+PPL_CORPUS_MEAN = 0.0   # calibrate()에서 자동 설정
+PPL_CORPUS_STD  = 1.0   # calibrate()에서 자동 설정
 
 # === 지시형 키워드 (instructionality) ===
 INSTRUCTION_KEYWORDS = [
